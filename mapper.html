@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Mapper</title>
         <style>
 html, body {
@@ -11,7 +13,7 @@ html, body {
 body {
     margin-left: 422px; /* leave space for sidebar */
     height: 100vh;
-    background: #ffffff;
+    background: #dcdcdc;
     -webkit-user-select: none; /* Safari */
     -moz-user-select: none;    /* Firefox */
     -ms-user-select: none;
@@ -25,6 +27,7 @@ body {
 }
 
 .page {
+    background: #ffffff;
     position: relative;
     margin-top: 20px;
     margin-left: 20px;
@@ -64,7 +67,7 @@ body {
 }
 
 #sidebar-title {
-    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    font-family: "Verdana";
     font-weight: bold;
     font-size: 1.2em;
     padding: 4px 6px;
@@ -94,6 +97,9 @@ body {
     font-size: 28px;
 }
 
+.tool-button:hover {
+    background-color: #0077ff45;
+}
 
 .tool-button.active {
     background-color: #0077ff;
@@ -106,7 +112,7 @@ body {
 
 /* ===== Notes ===== */
 
-.postit, .tape, .paper {
+.note {
     position: absolute;
     min-width: 1ch;
     min-height: 1em;
@@ -116,12 +122,12 @@ body {
     padding: 10px;
 }
 
-.postit[contenteditable]:focus, .tape[contenteditable]:focus, .paper[contenteditable]:focus{
+.note[contenteditable]:focus {
     outline: none;
     cursor: text;
 }
 
-.postit.editing, .tape.editing, .paper.editing {
+.note.editing {
     box-shadow: 0 0 20px #0000ff;
     -webkit-user-select: text;
     -moz-user-select: text;
@@ -132,8 +138,9 @@ body {
 /* ===== Post It Note ===== */
 
 .postit {
-    font-family: "Courier";
+    font-family: "Courier New";
     font-size: 16px;
+    font-weight: 600;
     max-width: 30ch;
     max-height: 19em;
     background: #fff3a0;
@@ -145,7 +152,7 @@ body {
 /* ===== Tape ===== */
 
 .tape {
-    font-family: "Lucida Handwriting", "Segoe Print", "Bradley Hand", cursive;
+    font-family: "Brush Script MT";
     font-size: 75px;
     height: 90px;
     background: #f4f0d5;
@@ -154,8 +161,9 @@ body {
 /* ===== Tape ===== */
 
 .paper {
-    font-family: "Courier";
+    font-family: "Courier New";
     font-size: 16px;
+    font-weight: 600;
     background: #ffffff;
     max-width: 501px;
     max-height: 1122px;
@@ -232,7 +240,7 @@ body.alt-down .paper:hover {
 
 
 .diagram-list-title {
-    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: "Verdana";
     font-size: 12px;
 }
 
@@ -244,7 +252,7 @@ body.alt-down .paper:hover {
 }
 
 .diagram-item {
-    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: "Verdana";
     font-size: 14px;
     display: flex;
     justify-content: space-between;
@@ -261,32 +269,65 @@ body.alt-down .paper:hover {
     margin-left: 4px;
     font-size: 0.8em;
 }
+
+.build-number {
+    font-family: "Verdana";
+    font-size: 8px;
+}
+
+.help-text {
+    display: flex;
+    flex-wrap: wrap;       /* allow wrapping if they run out of space */
+    gap: 6px;              /* space between tags */
+    align-items: center;
+}
+
+.help-element {
+    font-family: "Verdana";
+    display: inline-block;
+    background-color: #e0e0e0;
+    color: #333;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;   /* keep the text on one line */
+}
         </style>
     </head>
     <body>
         <div id="sidebar">
-            <div id="sidebar-title" contenteditable="true">New Diagram</div>
+            <div id="sidebar-title" contenteditable="true" spellcheck="false">New Diagram</div>
 
             <div id="toolbar">
-                <button id="tool-page" class="tool-button">+</button>
+                <button id="tool-page" class="tool-button">➕</button>
                 <button id="tool-tape" class="tool-button">🏷️</button>
                 <button id="tool-note" class="tool-button">🍚</button>
                 <button id="tool-paper" class="tool-button">📃</button>
-                <button id="tool-line" class="tool-button">∕</button>
-                <button id="tool-arrow" class="tool-button">➚</button>
-                <button id="tool-undo" class="tool-button">↶</button>
-                <button id="tool-redo" class="tool-button">↷</button>
+                <button id="tool-line" class="tool-button">📏</button>
+                <button id="tool-arrow" class="tool-button">👆</button>
+                <button id="tool-image" class="tool-button">🖼️</button>
+                <button id="tool-undo" class="tool-button">⏪️</button>
+                <button id="tool-redo" class="tool-button">⏩️</button>
                 <button id="tool-save" class="tool-button">💾</button>
+                <button id="export" class="tool-button">📤</button>
+                <button id="import" class="tool-button">📥</button>
+                <button id="debug" class="tool-button">👾</button>
             </div>
             <div id="diagram-list-container">
                 <span class="diagram-list-title">Diagrams</span>
                 <div id="diagram-list"></div>
             </div>
-            <button id="new-diagram">+</button>
-            <button id="export">📤</button>
-            <button id="import">📥</button>
-            <button id="debug">DEBUG</button>
+            <button id="new-diagram">New</button>
             <textarea id="data"></textarea>
+            <div class="help-text">
+                <span class="help-element">1: Tape</span>
+                <span class="help-element">2: Post it</span>
+                <span class="help-element">3: Paper</span>
+                <span class="help-element">Ctrl+s: Save</span>
+                <span class="help-element">Ctrl+u: Underline</span>
+                <span class="help-element">Ctrl+h: Highlight</span>
+            </div>
+            <div class="build-number">202601131929</div>
         </div>
 
         <div id="workspace">
@@ -295,11 +336,10 @@ body.alt-down .paper:hover {
     </body>
     <script>
 let state = {
+    version: 1,
     title: "",
     pages: 1,
-    tapes: [],
     notes: [],
-    papers: [],
     lines: [],
     arrows: []
 };
@@ -339,57 +379,57 @@ function clearEditingNote() {
 function makePage() {
     const el = document.createElement("div");
     el.className = "page";
-    
-    // Clicking adds something based on the tool
-    el.addEventListener("mousedown", e => {
-        clearEditingNote();
-
-        const x = e.pageX;
-        const y = e.pageY;
-
-        if (activeTool == "line") {
-            startX = x;
-            startY = y;
-            const el = createLine(x, y, x, y);
-            drawingLine = el;
-        } else if (activeTool == "arrow") {
-            startX = x;
-            startY = y;
-            const el = createArrow(x, y, x, y);
-            drawingLine = el;
-            
-        }
-    });
-
-    el.addEventListener("dblclick", e => {
-        clearEditingNote();
-
-        const x = e.pageX;
-        const y = e.pageY;
-
-        if (activeTool == "postit") {
-            const el = createPostIt(x, y);
-            makeEditable(el, true);
-            updateState();
-        } else if (activeTool == "tape") {
-            const el = createTape(x, y);
-            makeEditable(el, true);
-            updateState();
-        } else if (activeTool == "paper") {
-            const el = createPaper(x, y);
-            makeEditable(el, true);
-            updateState();
-        }
-    });
-
     workspace.appendChild(el);
 }
+
+// Clicking adds something based on the tool
+workspace.addEventListener("mousedown", e => {
+    clearEditingNote();
+
+    const x = e.pageX;
+    const y = e.pageY;
+
+    if (activeTool == "line") {
+        startX = x;
+        startY = y;
+        const el = createLine(x, y, x, y);
+        drawingLine = el;
+    } else if (activeTool == "arrow") {
+        startX = x;
+        startY = y;
+        const el = createArrow(x, y, x, y);
+        drawingLine = el;
+        
+    }
+});
+
+workspace.addEventListener("dblclick", e => {
+    clearEditingNote();
+
+    const x = e.pageX;
+    const y = e.pageY;
+
+    if (activeTool == "postit") {
+        const el = createPostIt(x, y);
+        makeEditable(el, true);
+        updateState();
+    } else if (activeTool == "tape") {
+        const el = createTape(x, y);
+        makeEditable(el, true);
+        updateState();
+    } else if (activeTool == "paper") {
+        const el = createPaper(x, y);
+        makeEditable(el, true);
+        updateState();
+    }
+});
 
 /* ===== Notes Logic ===== */
 
 function makeNote(type, x, y, text) {
     const el = document.createElement("div");
-    el.className = type;
+    el.className = "note";
+    el.classList.add(type);
     el.contentEditable = false;
     el.innerHTML = text;
     el.style.left = x + "px";
@@ -398,6 +438,10 @@ function makeNote(type, x, y, text) {
 
     // Double clicking makes the note editable
     el.addEventListener("dblclick", e => {
+        // If double clicking the note that is being edited, don't change anything.
+        if (editingNote == el) {
+            return
+        }
         // Clear any note that is currently being edited.
         clearEditingNote();
         // make the note editable
@@ -424,8 +468,27 @@ function makeNote(type, x, y, text) {
         dragStartY = e.pageY;
         noteStartX = rect.left + window.scrollX;
         noteStartY = rect.top + window.scrollY;
-        el.parentElement.appendChild(el); // Bring this note to the foreground
+
+        if (!e.shiftKey) {
+            el.parentElement.appendChild(el); // Bring this note to the foreground
+        }
     });
+
+    el.addEventListener("keydown", (e) => {
+        if (!editingNote) return; // Only act if a note is being edited
+
+        // Check for Ctrl/Cmd + U
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "u") {
+            e.preventDefault(); // Prevent default browser behavior
+            document.execCommand("underline");
+        }
+
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "h") {
+            e.preventDefault(); // Prevent default browser behavior
+            document.execCommand("hiliteColor", false, "orange");
+        }
+    });
+
 
     document.body.appendChild(el);
     return el;
@@ -480,6 +543,8 @@ function insertTextAtCursor(el, text) {
 // Even if the cursor moves outside the element, it will still drag.
 document.addEventListener("mousemove", e => {
     if (dragTarget) {
+        clearEditingNote();
+
         const dx = e.pageX - dragStartX;
         const dy = e.pageY - dragStartY;
 
@@ -552,6 +617,16 @@ document.addEventListener("mouseup", () => {
 });
 
 /* ===== Creating notes ===== */
+
+function createNote(type, x, y, text) {
+    if (type == "postit") {
+        createPostIt(x, y, text);
+    } else if (type == "tape") {
+        createTape(x, y, text);
+    } else if (type == "paper") {
+        createPaper(x, y, text)
+    }
+}
 
 function createPostIt(x, y, text = "<div>Text</div>") {
     return makeNote("postit", x, y, text);
@@ -635,6 +710,10 @@ document.getElementById("tool-arrow").addEventListener("click", (e) => {
     switchTool(e.currentTarget, "arrow");
 });
 
+document.getElementById("tool-image").addEventListener("click", (e) => {
+    addImage();
+});
+
 document.getElementById("tool-undo").addEventListener("click", (e) => {
     undo();
 });
@@ -680,10 +759,32 @@ document.addEventListener("keyup", e => {
     }
 });
 
+// Disable the alt state when the user moves away from the window
+// Not sure which one I'm supposed to use to do this properly.
+document.addEventListener("visibilitychange", () => {
+    document.body.classList.remove("alt-down");
+    disableLineClicks();
+});
+
+window.addEventListener("blur", () => {
+    document.body.classList.remove("alt-down");
+    disableLineClicks();
+});
+
+
 // Pressing escape should stop any edits
 document.addEventListener("keydown", e => {
     if (e.key === "Escape") {
         clearEditingNote();
+    }
+});
+
+document.addEventListener("keydown", e => {
+    // Check for Ctrl+S (Windows/Linux) or Cmd+S (Mac)
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+        e.preventDefault(); // prevent browser save dialog
+        saveDiagram();
+        refreshDiagramList();
     }
 });
 
@@ -753,24 +854,48 @@ function restoreHTMLNewLines(s){
             .replace(/<div><\/div>/g, "<div><br></div>");
 }
 
+function getNoteHTMLType(el) {
+    if (el.classList.contains("postit")) {
+        return "postit"
+    } else if (el.classList.contains("tape")) {
+        return "tape"
+    } else if (el.classList.contains("paper")) {
+        return "paper"
+    }
+}
+
+function getNoteDataType(e) {
+    if (e.type == "postit") {
+        return "postit"
+    } else if (e.type == "tape") {
+        return "tape"
+    } else if (e.type == "paper") {
+        return "paper"
+    }
+}
+
+function getStrippedText(el) {
+    if (getNoteHTMLType(el) == "tape") {
+        return el.innerText;
+    }
+    return stripHTMLNewlines(el.innerHTML);
+}
+
+function getRestoredText(e) {
+    if (getNoteDataType(e) == "tape") {
+        return e.text;
+    }
+    return restoreHTMLNewLines(e.text);
+}
 
 function updateState(showUnsaved = true) {
     state.title = document.getElementById("sidebar-title").innerText;
     state.pages = document.querySelectorAll(".page").length;
-    state.tapes = [...document.querySelectorAll(".tape")].map(t => ({
-        x: parseInt(t.style.left),
-        y: parseInt(t.style.top),
-        text: t.innerText
-    }));
-    state.notes = [...document.querySelectorAll(".postit")].map(n => ({
+    state.notes = [...document.querySelectorAll(".note")].map(n => ({
+        type: getNoteHTMLType(n),
         x: parseInt(n.style.left),
         y: parseInt(n.style.top),
-        text: stripHTMLNewlines(n.innerHTML)
-    }));
-    state.papers = [...document.querySelectorAll(".paper")].map(n => ({
-        x: parseInt(n.style.left),
-        y: parseInt(n.style.top),
-        text: stripHTMLNewlines(n.innerHTML)
+        text: getStrippedText(n)
     }));
     state.lines = [...document.querySelectorAll(".line")].map(l => ({
         x1: Number(l.dataset.x1),
@@ -795,7 +920,33 @@ function updateState(showUnsaved = true) {
 }
 
 function loadState(data) {
-    document.querySelectorAll(".postit,.tape,.paper,.line,.arrow,.page").forEach(e => e.remove());
+    if (!("version" in data)) {
+        console.log("Loading legacy state");
+        loadStateLegacy(data);
+        return
+    }
+
+    document.querySelectorAll(".note,.line,.arrow,.page").forEach(e => e.remove());
+    for (let p = 0; p < data.pages; p++) {
+        makePage();
+    }
+    if (data.title) {
+        document.getElementById("sidebar-title").innerText = data.title;
+    }
+    data.notes.forEach(n => {
+        createNote(n.type, n.x, n.y, getRestoredText(n));
+    });
+    data.lines.forEach(l => {
+        createLine(l.x1, l.y1, l.x2, l.y2);
+    });
+    data.arrows.forEach(l => {
+        createArrow(l.x1, l.y1, l.x2, l.y2);
+    });
+    updateState(false);
+}
+
+function loadStateLegacy(data) {
+    document.querySelectorAll(".note,.line,.arrow,.page").forEach(e => e.remove());
     for (let p = 0; p < data.pages; p++) {
         makePage();
     }
@@ -819,7 +970,7 @@ function loadState(data) {
     data.arrows.forEach(l => {
         createArrow(l.x1, l.y1, l.x2, l.y2);
     });
-    updateState(false);
+    updateState(true);
 }
 
 const STORAGE_KEY = "mapper";
@@ -991,5 +1142,101 @@ importFileInput.addEventListener("change", () => {
 
     reader.readAsText(file);
 });
+
+document.addEventListener("mousemove", e => {
+    mouseX = e.pageX;
+    mouseY = e.pageY;
+});
+
+document.addEventListener("keydown", e => {
+    // Ignore repeats (holding key down)
+    if (e.repeat) return;
+
+    // Ignore when editing a note
+    if (editingNote) return;
+
+    const active = document.activeElement;
+
+    // Ignore when typing into editable elements
+    if (active &&
+        (active.isContentEditable || active.tagName === "INPUT" || active.tagName === "TEXTAREA")) {
+        return;
+    }
+
+    clearEditingNote();
+
+    const x = mouseX;
+    const y = mouseY;
+
+    if (e.key === "1") {
+        e.preventDefault();
+        const el = createTape(x, y);
+        makeEditable(el, true);
+        updateState();
+    } else if (e.key === "2") {
+        e.preventDefault();
+        const el = createPostIt(x, y);
+        makeEditable(el, true);
+        updateState();
+    } else if (e.key === "3") {
+        e.preventDefault();
+        const el = createPaper(x, y);
+        makeEditable(el, true);
+        updateState();
+    }
+});
+
+function addImage() {
+    // Create a hidden file input
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+
+    input.onchange = e => {
+        const file = input.files[0];
+        if (!file) return;
+
+        // Create an Image object
+        const img = new Image();
+        const reader = new FileReader();
+
+        reader.onload = function (event) {
+            img.src = event.target.result; // base64
+        };
+
+        img.onload = function () {
+            // Downscale if too large
+            const maxWidth = 300;  // maximum width in px
+            const maxHeight = 300; // maximum height in px
+            let { width, height } = img;
+
+            if (width > maxWidth || height > maxHeight) {
+                const scale = Math.min(maxWidth / width, maxHeight / height);
+                width = width * scale;
+                height = height * scale;
+            }
+
+            // Draw onto canvas to compress / resize
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // Convert back to base64 with compression
+            const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.7); // quality 0.7 for jpeg
+
+            // Create a note with the image inside
+            const note = createPaper(500, 100);
+            note.innerHTML = `<img src="${compressedDataUrl}" style="max-width:100%; height:auto;">`;
+            updateState();
+        };
+
+        reader.readAsDataURL(file);
+    };
+    input.click(); // open the file picker
+}
+
+loadDiagram("Home"); // Load the home diagram, if available, by default
     </script>
 </html>
