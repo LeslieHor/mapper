@@ -246,7 +246,7 @@ body.alt-down .paper:hover {
 
 #diagram-list {
     overflow-y: auto;
-    max-height: 300px;
+    max-height: 500px;
     border: 1px solid #ccc;
     padding: 4px;
 }
@@ -318,7 +318,7 @@ body.alt-down .paper:hover {
             <div id="sidebar-title" contenteditable="true" spellcheck="false">New Diagram</div>
 
             <div id="toolbar">
-                <button id="tool-page" class="tool-button"><img src="data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAWUlEQVRYR+2XMQ4AIAjE4P+P1gUddAIxhKTOKKUOF1SKjxb3l/YAwwyGBwlftMYAYAADGMBAuoH14O+Q3BFwZkE5gHfy9C8AAAMYwAAG2hnwAl/1r5tRf4AJMf0aIa3j0fQAAAAASUVORK5CYIIA"></button>
+                <button id="tool-page" class="tool-button"><img src="data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAdElEQVRYR+2WCQ4AEAwE+f+jCQmRuNKiJdYD7BgttUZ5WeV8A4CrDDjheoiHLw0EACkjOet5gHRtVHPbDAAABv4wsPpCtlqU1IbqAKMv4o8agAEYuNoAd4ojPUTckJm55kx4Iqy3ZwUgGZ6zqLPcdkgAqBvwQDs6IcqJ/98AAAAASUVORK5CYIIA"></button>
                 <button id="tool-tape" class="tool-button"><img src="data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAu0lEQVRYR+2X3QrAIAiF1/s/9IYwQcL0SLpguNv8+TzKsnEd/sbh/BcCcL+QiK2sB/JDgnIgCo7Ykx3sgwSkYGQHVTTZse+y0xEAWdnKb4ZMB7AgNIVKADSIVXvKAOZBWw1oKQA6E+acRYcw+t8qV8ADaoBWoBVoBf6vgLeklCog167Pb0Nt89EgShSwlo8ZIh0A6bmESAXwkvPVLO3SADg4ssCUvAsijxJNia13gbf1bJ2jkm4lsZyPAzxakEohrB/z5gAAAABJRU5ErkJgggAA"></button>
                 <button id="tool-note" class="tool-button"><img src="data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAfElEQVRYR+2WOwoAIAxD9f6HVhzc7CfS0CXOSp5PpJmjec3m/CEAy8AiPM0zywOofJ5zIQHIgAzIgAzIANVAZnrSAaLR3gJwzZijvaoPvOZ9GH5KDwsgFc4CSIczAKDwaoDbY6EuGX0dtBxD4Z4BNPh7P0z8nWQcFEC7gQ0O9jIhF8LMeQAAAABJRU5ErkJgggAA"></button>
                 <button id="tool-paper" class="tool-button"><img src="data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAZklEQVRYR+2XMQoAIAwD7f8frXRwtIIpHELcNdfEDI0Bn4D1RwUwG+GOOjeADodykL8BlChy8v8dUP+i7IAjcAS4AziAW+AIcAdwALfAEeAO4ABuARqBKr7vP21GXeLlOx27nwS6AFtSPiFiXfQSAAAAAElFTkSuQmCC"></button>
@@ -346,7 +346,7 @@ body.alt-down .paper:hover {
                 <span class="help-element">Ctrl+u: Underline</span>
                 <span class="help-element">Ctrl+h: Highlight</span>
             </div>
-            <div class="build-number">202601132128</div>
+            <div class="build-number">202601141909</div>
         </div>
 
         <div id="workspace">
@@ -627,12 +627,27 @@ document.addEventListener("mousemove", e => {
     }
 });
 
+const MIN_LINE_LENGTH = 10;
+
 // Mouse release whilst creating a line
 document.addEventListener("mouseup", () => {
-    if (drawingLine) {
-        drawingLine = null;
+    if (!drawingLine) return;
+
+    const x1 = Number(drawingLine.dataset.x1);
+    const y1 = Number(drawingLine.dataset.y1);
+    const x2 = Number(drawingLine.dataset.x2);
+    const y2 = Number(drawingLine.dataset.y2);
+
+    const length = Math.hypot(x2 - x1, y2 - y1);
+
+    if (length < MIN_LINE_LENGTH) {
+        // Treat as mis-click
+        drawingLine.remove();
+    } else {
         updateState();
     }
+
+    drawingLine = null;
 });
 
 /* ===== Creating notes ===== */
@@ -1240,54 +1255,82 @@ document.addEventListener("keydown", e => {
 });
 
 function addImage() {
-    // Create a hidden file input
     const input = document.createElement("input");
     input.type = "file";
     input.accept = "image/*";
 
-    input.onchange = e => {
+    input.onchange = () => {
         const file = input.files[0];
         if (!file) return;
 
-        // Create an Image object
-        const img = new Image();
-        const reader = new FileReader();
-
-        reader.onload = function (event) {
-            img.src = event.target.result; // base64
-        };
-
-        img.onload = function () {
-            // Downscale if too large
-            const maxWidth = 300;  // maximum width in px
-            const maxHeight = 300; // maximum height in px
-            let { width, height } = img;
-
-            if (width > maxWidth || height > maxHeight) {
-                const scale = Math.min(maxWidth / width, maxHeight / height);
-                width = width * scale;
-                height = height * scale;
-            }
-
-            // Draw onto canvas to compress / resize
-            const canvas = document.createElement("canvas");
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext("2d");
-            ctx.drawImage(img, 0, 0, width, height);
-
-            // Convert back to base64 with compression
-            const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.7); // quality 0.7 for jpeg
-
-            // Create a note with the image inside
-            const note = createPaper(500, 100);
-            note.innerHTML = `<img src="${compressedDataUrl}" style="max-width:100%; height:auto;">`;
-            updateState();
-        };
-
-        reader.readAsDataURL(file);
+        processImageFile(file, {}, dataUrl => {
+            createImageNoteFromDataUrl(dataUrl);
+        });
     };
-    input.click(); // open the file picker
+
+    input.click();
+}
+
+document.addEventListener("paste", e => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    for (const item of items) {
+        if (item.type.startsWith("image/")) {
+            e.preventDefault();
+            const file = item.getAsFile();
+
+            processImageFile(file, {}, dataUrl => {
+                const x = mouseX;
+                const y = mouseY;
+                createImageNoteFromDataUrl(dataUrl, x, y);
+            });
+
+            break;
+        }
+    }
+});
+
+function createImageNoteFromDataUrl(dataUrl, x = 500, y = 100) {
+    const note = createPaper(x, y);
+    note.innerHTML = `<img src="${dataUrl}" style="max-width:100%; height:auto;">`;
+    updateState();
+}
+
+function processImageFile(file, {
+    maxWidth = 300,
+    maxHeight = 300,
+    mime = "image/jpeg",
+    quality = 0.7
+} = {}, callback) {
+    const img = new Image();
+    const reader = new FileReader();
+
+    reader.onload = e => {
+        img.src = e.target.result;
+    };
+
+    img.onload = () => {
+        let { width, height } = img;
+
+        if (width > maxWidth || height > maxHeight) {
+            const scale = Math.min(maxWidth / width, maxHeight / height);
+            width *= scale;
+            height *= scale;
+        }
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const dataUrl = canvas.toDataURL(mime, quality);
+        callback(dataUrl);
+    };
+
+    reader.readAsDataURL(file);
 }
 
 loadDiagram("Home"); // Load the home diagram, if available, by default
